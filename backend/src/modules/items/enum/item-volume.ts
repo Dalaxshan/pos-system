@@ -1,0 +1,18 @@
+export enum Volume {
+  Units = 'units',
+  KiloGram = 'kg',
+  Gram = 'g',
+  Litre = 'l',
+  Millilitre = 'ml',
+  Gallon = 'gal',
+  Ounce = 'oz',
+  Pint = 'pt',
+  Quart = 'qt',
+  CubicMeter = 'm3',
+  CubicCentimeter = 'cm3',
+  FluidOunce = 'fl oz',
+  Bushel = 'bu',
+  Barrel = 'bbl',
+  Decilitre = 'dl',
+  Hectolitre = 'hl',
+}

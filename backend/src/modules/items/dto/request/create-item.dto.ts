@@ -1,0 +1,106 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Type, Transform } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { QtyDto } from './quantity.dto';
+import { Types } from 'mongoose';
+import { CustomizationDto } from './customization.dto';
+import { toObjectId } from 'src/utils/to-object-id';
+import { toBoolean } from 'src/utils/to-boolean';
+
+export class CreateItemDto {
+  @ApiProperty({
+    description: 'Name of the item',
+    example: 'Apple',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({
+    description: 'Category Id',
+    example: '620000563259742v2',
+  })
+  @IsOptional()
+  @Transform(({ value }) => toObjectId(value), { toClassOnly: true })
+  categoryId?: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Recipe Id',
+    example: '620000563259742v2',
+    required: false,
+  })
+  @IsOptional()
+  // @Transform(({ value }) => toObjectId(value), { toClassOnly: true })
+  recipeId?: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Supplier Id',
+    example: '620000563259742v2',
+  })
+  @IsOptional()
+  @Transform(({ value }) => toObjectId(value), { toClassOnly: true })
+  supplierId?: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Employee Id',
+    example: '620000563259742v2',
+  })
+  @IsOptional()
+  @Transform(({ value }) => toObjectId(value), { toClassOnly: true })
+  employeeId?: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Is item for sale',
+    example: true,
+  })
+  @IsNotEmpty()
+  @Transform(({ value }) => toBoolean(value), { toClassOnly: true })
+  isForSale: boolean;
+
+  @ApiProperty({
+    description: 'Description of the item',
+    example: 'Fresh Apple',
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({
+    description: 'Unit price of an item',
+    example: 1000,
+  })
+  @IsNotEmpty()
+  unitPrice: number;
+
+  @ApiProperty({
+    description: 'Quantity of the item',
+    type: QtyDto,
+    example: { quantity: 10, volume: 'liters' },
+  })
+  @ValidateNested()
+  @Type(() => QtyDto)
+  quantity: QtyDto;
+
+  @ApiProperty({
+    description: 'Discount of the item',
+    example: 10,
+  })
+  @IsOptional()
+  discount?: number;
+
+  @ApiProperty({
+    description: 'Item customizations',
+    type: [CustomizationDto],
+    example: [
+      {
+        variation: 'Extra cheese',
+        price: 300,
+        isRequired: true,
+      },
+    ],
+  })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CustomizationDto)
+  customizations?: CustomizationDto[];
+}
