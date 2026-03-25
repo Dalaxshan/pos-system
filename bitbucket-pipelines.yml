@@ -1,0 +1,66 @@
+image: node:20
+
+pipelines:
+  branches:
+    development:
+      - step:
+          name: 'Build Project'
+          script:
+            - yarn install --frozen-lockfile
+            - yarn build
+          artifacts:
+            - .next/**
+            - package.json
+            - yarn.lock
+            - public/**
+            - next.config.js
+            - .env*
+      - step:
+          name: 'Deploy to Server'
+          deployment: development
+          script:
+            - pipe: atlassian/scp-deploy:0.3.3
+              variables:
+                USER: $USER
+                SERVER: $SERVER
+                REMOTE_PATH: '/home/ubuntu/maki-pos/front-end/.next'
+                LOCAL_PATH: '.next/*'
+            - pipe: atlassian/scp-deploy:0.3.3
+              variables:
+                USER: $USER
+                SERVER: $SERVER
+                REMOTE_PATH: '/home/ubuntu/maki-pos/front-end'
+                LOCAL_PATH: 'package.json'
+            - pipe: atlassian/scp-deploy:0.3.3
+              variables:
+                USER: $USER
+                SERVER: $SERVER
+                REMOTE_PATH: '/home/ubuntu/maki-pos/front-end'
+                LOCAL_PATH: 'yarn.lock'
+            - pipe: atlassian/scp-deploy:0.3.3
+              variables:
+                USER: $USER
+                SERVER: $SERVER
+                REMOTE_PATH: '/home/ubuntu/maki-pos/front-end/public'
+                LOCAL_PATH: 'public/*'
+            - pipe: atlassian/scp-deploy:0.3.3
+              variables:
+                USER: $USER
+                SERVER: $SERVER
+                REMOTE_PATH: '/home/ubuntu/maki-pos/front-end'
+                LOCAL_PATH: 'next.config.js'
+            - pipe: atlassian/scp-deploy:0.3.3
+              variables:
+                USER: $USER
+                SERVER: $SERVER
+                REMOTE_PATH: '/home/ubuntu/maki-pos/front-end'
+                LOCAL_PATH: '.env*'
+            - pipe: atlassian/ssh-run:0.3.0
+              variables:
+                SSH_USER: $USER
+                SERVER: $SERVER
+                MODE: 'command'
+                COMMAND: |
+                  cd /home/ubuntu/maki-pos/front-end
+                  yarn install --frozen-lockfile
+                  pm2 restart mak-fe
