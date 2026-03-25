@@ -1,0 +1,36 @@
+image: node:20
+
+pipelines:
+  branches:
+    development:
+      - step:
+          name: 'Build Project'
+          script:
+            - yarn install --frozen-lockfile
+            - yarn build
+            - cp package.json dist/package.json
+            - cp yarn.lock dist/yarn.lock
+            - cp .env.development dist/.env.development
+            - cp .env.production dist/.env.production
+            - cp ecosystem.config.js dist/ecosystem.config.js
+          artifacts:
+            - dist/**
+      - step:
+          name: 'Deploy to Server'
+          deployment: development
+          script:
+            - pipe: atlassian/scp-deploy:0.3.3
+              variables:
+                USER: $USER
+                SERVER: $SERVER
+                REMOTE_PATH: '/home/ubuntu/maki-pos/back-end'
+                LOCAL_PATH: 'dist/*'
+            - pipe: atlassian/ssh-run:0.3.0
+              variables:
+                SSH_USER: $USER
+                SERVER: $SERVER
+                MODE: 'command'
+                COMMAND: |
+                  cd /home/ubuntu/maki-pos/back-end
+                  yarn install --frozen-lockfile
+                  yarn start:dev
